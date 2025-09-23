@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成AIプロンプト活用で業務効率化を実現</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Atlassian Design Colors */
+            --primary-color: #0052CC;
+            --secondary-color: #36B37E;
+            --accent-color: #FF5630;
+            --text-color: #172B4D;
+            --text-secondary: #6B778C;
+            --light-bg: #F4F5F7;
+            --white: #FFFFFF;
+            --gray: #97A0AF;
+            --success: #36B37E;
+            --warning: #FFAB00;
+            --error: #DE350B;
+            --neutral: #DFE1E6;
+            --brand: #0052CC;
+            --elevation-shadow: 0 2px 6px rgba(3, 102, 214, 0.15);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Noto Sans', 'Ubuntu', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.5;
+            color: var(--text-color);
+            background: var(--light-bg);
+            overflow: hidden;
+            height: 100vh;
+            font-weight: 400;
+        }
+
+        .presentation-container {
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+
+        .slide {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            background: var(--white);
+            padding: 60px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            animation: slideIn 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* タイトルスライド */
+        .title-slide {
+            text-align: center;
+            display: flex !important;
+            flex-direction: column;
+            justify-content: center;
+            background: #ffffff;
+            color: var(--text-color);
+        }
+
+        .title-slide h1 {
+            font-size: 3.2em;
+            margin-bottom: 30px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--primary-color);
+            line-height: 1.3;
+        }
+
+        .title-slide .subtitle {
+            font-size: 1.6em;
+            margin-bottom: 40px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .title-slide .divider {
+            width: 120px;
+            height: 4px;
+            background: var(--primary-color);
+            margin: 40px auto;
+            border-radius: 2px;
+        }
+
+        .title-slide .date {
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+
+        /* 通常スライド - Atlassian Typography (Large Sizes) */
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 32px;
+            color: var(--text-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 16px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        h2 {
+            font-size: 2.25rem;
+            margin: 24px 0 16px 0;
+            color: var(--text-color);
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        h3 {
+            font-size: 1.75rem;
+            margin: 20px 0 12px 0;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        /* テキスト - Atlassian Typography (Large Sizes) */
+        p {
+            font-size: 1.25rem;
+            margin: 16px 0;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        ul, ol {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+
+        li {
+            margin: 10px 0;
+            font-size: 1.25rem;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        /* コードブロック - Atlassian Design (Extra Large Sizes) */
+        .code-container {
+            position: relative;
+            margin: 24px 0;
+        }
+
+        pre {
+            background: #F4F5F7;
+            border: 1px solid var(--neutral);
+            border-radius: 6px;
+            padding: 24px;
+            margin: 0;
+            overflow-x: auto;
+            font-size: 1.125rem;
+            line-height: 1.7;
+            box-shadow: var(--elevation-shadow);
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--white);
+            border: 1px solid var(--neutral);
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease-in-out;
+            box-shadow: var(--elevation-shadow);
+        }
+
+        .copy-button:hover {
+            background: var(--light-bg);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .copy-button.copied {
+            background: var(--success);
+            border-color: var(--success);
+            color: var(--white);
+        }
+
+        code {
+            font-family: 'SFMono-Regular', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+            color: var(--text-color);
+            background: #F4F5F7;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 1.125rem;
+        }
+
+        /* 強調 - Atlassian Design */
+        .highlight {
+            background: rgba(0, 82, 204, 0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .highlight-box {
+            background: var(--light-bg);
+            border-left: 4px solid var(--primary-color);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+            font-size: 1.25rem;
+            line-height: 1.6;
+        }
+
+        /* カード - Atlassian Design */
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 24px;
+            margin: 24px 0;
+            box-shadow: var(--elevation-shadow);
+            border: 1px solid var(--neutral);
+            transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(3, 102, 214, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .card.success {
+            border-left: 4px solid var(--success);
+            background: linear-gradient(90deg, rgba(54, 179, 126, 0.05), var(--white));
+        }
+
+        .card.warning {
+            border-left: 4px solid var(--warning);
+            background: linear-gradient(90deg, rgba(255, 171, 0, 0.05), var(--white));
+        }
+
+        .card.error {
+            border-left: 4px solid var(--error);
+            background: linear-gradient(90deg, rgba(222, 53, 11, 0.05), var(--white));
+        }
+
+        /* 比較レイアウト */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 40px 0;
+        }
+
+        .comparison-item {
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .before {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: var(--white);
+        }
+
+        .after {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: var(--primary-color);
+        }
+
+        /* Result boxes for prompt examples */
+        .result-box {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .result-box.error {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: var(--white);
+        }
+
+        .result-box.success {
+            background: rgba(54, 179, 126, 0.1);
+            border: 2px solid var(--success);
+            color: var(--text-color);
+        }
+
+        .before h3, .after h3 {
+            margin-top: 0;
+        }
+
+        /* プロンプト例と出力例のスタイル */
+        .prompt-example, .output-example {
+            background: var(--light-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .prompt-example h3, .output-example h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .prompt-example pre, .output-example pre {
+            background: var(--white);
+            border: 2px solid var(--neutral);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        /* 画像 */
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            margin: 30px 0;
+            border: 3px solid var(--light-bg);
+        }
+
+        .image-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .image-caption {
+            font-size: 1.1em;
+            color: var(--gray);
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        /* ナビゲーション（非表示） */
+        .nav-controls {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 20px;
+            z-index: 1001;
+            background: var(--white);
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: #0747A6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 82, 204, 0.3);
+        }
+
+        .nav-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .nav-btn:disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .slide-counter {
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        /* プログレスバー - Atlassian Design */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--neutral);
+            z-index: 1000;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-color);
+            transition: width 0.3s ease-in-out;
+            border-radius: 0 2px 2px 0;
+        }
+
+        /* スライド番号 - Atlassian Design */
+        .slide-number {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: var(--white);
+            padding: 8px 16px;
+            border-radius: 6px;
+            box-shadow: var(--elevation-shadow);
+            font-weight: 500;
+            color: var(--text-secondary);
+            z-index: 1000;
+            font-size: 0.875rem;
+            border: 1px solid var(--neutral);
+        }
+
+        /* PC専用設計のためレスポンシブコードを削除 */
+
+        /* 特殊要素 */
+        .step-number {
+            display: inline-flex;
+            width: 32px;
+            height: 32px;
+            background: var(--primary-color);
+            color: var(--white);
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 12px;
+            font-size: 0.875rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .feature-item {
+            background: var(--white);
+            padding: 24px;
+            border-radius: 8px;
+            text-align: center;
+            transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+            border: 1px solid var(--neutral);
+            box-shadow: var(--elevation-shadow);
+        }
+
+        .feature-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(3, 102, 214, 0.25);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 82, 204, 0.1);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--white);
+            padding: 40px;
+            border-radius: 20px;
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .summary-box h2 {
+            color: var(--white);
+            margin-bottom: 20px;
+        }
+
+        .url-link {
+            font-size: 1.1em;
+            color: var(--secondary-color);
+            text-decoration: underline;
+            margin: 20px 0;
+            display: block;
+        }
+
+        /* リンクをクリック可能にする */
+        a {
+            color: var(--secondary-color);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        a:hover {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 80vh;
+        }
+    </style>
+</head>
+<body>
+    <!-- プログレスバー -->
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressBar"></div>
+    </div>
+
+    <!-- スライド番号 -->
+    <div class="slide-number" id="slideNumber">1 / 34</div>
+
+    <!-- プレゼンテーションコンテナ -->
+    <div class="presentation-container">
+        
+        <!-- スライド1: タイトル -->
+        <div class="slide active title-slide">
+            <h1>生成AIプロンプト活用で<br>業務効率化を実現</h1>
+            <div class="divider"></div>
+            <p class="subtitle">業務における実践的プロンプトエンジニアリング</p>
+            <div class="date">2025年9月24日</div>
+            <div class="logo">
+                <img src="/img/c-table_logo.png" alt="会社ロゴ" style="height: 80px; margin-top: 40px;">
+            </div>
+        </div>
+
+        <!-- スライド2: プロンプトとは？ -->
+        <div class="slide">
+            <h1>プロンプトとは？</h1>
+            <h2><i class="fas fa-comments"></i> AIへの指示・質問文のこと</h2>
+            
+            <div class="comparison">
+                <div class="comparison-item before">
+                    <h3><i class="fas fa-times-circle"></i> 曖昧なプロンプト</h3>
+                    <pre><code>天気を教えて</code></pre>
+                    <div class="result-box error">
+                        <strong>結果:</strong> どこの？いつの？何が知りたい？
+                    </div>
+                </div>
+                <div class="comparison-item after">
+                    <h3><i class="fas fa-check-circle"></i> 明確なプロンプト</h3>
+                    <pre><code>明日の東京の天気と気温、
+降水確率を教えてください</code></pre>
+                    <div class="result-box success">
+                        <strong>結果:</strong> 具体的で実用的な情報を取得
+                    </div>
+                </div>
+            </div>
+            
+            <div class="highlight-box">
+                <h3><i class="fas fa-key"></i> 重要ポイント</h3>
+                <p><strong>同じAIでも、プロンプト（指示）の質で出力結果が大きく変わります。</strong><br>
+                適切なプロンプトを作成することが、AI活用の第一歩です。</p>
+            </div>
+        </div>
+
+        <!-- スライド3: プロンプトエンジニアリングとは？ -->
+        <div class="slide">
+            <h1>プロンプトエンジニアリングとは？</h1>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-bullseye"></i></div>
+                    <h3>AIへの指示の最適化技術</h3>
+                    <p>同じAIでも、指示の仕方で出力品質が大きく変わる</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                    <h3>業務効率化の鍵</h3>
+                    <p>適切なプロンプトで作業時間を大幅に短縮</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>必須スキル</h3>
+                    <p>AI時代に求められる重要な技術スキル</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- スライド3: 自治体業務における課題と解決 -->
+        <div class="slide">
+            <h1>業務における課題と解決</h1>
+            <div class="comparison">
+                <div class="comparison-item before">
+                    <h3><i class="fas fa-exclamation-triangle"></i> 現状の課題</h3>
+                    <ul>
+                        <li>定型文書作成の時間的負担</li>
+                        <li>担当者による対応品質のばらつき</li>
+                        <li>議事録等の活用不足</li>
+                    </ul>
+                </div>
+                <div class="comparison-item after">
+                    <h3><i class="fas fa-check-circle"></i> AIプロンプトによる解決</h3>
+                    <ul>
+                        <li><strong>作業時間を削減</strong></li>
+                        <li><strong>対応品質の標準化</strong></li>
+                        <li><strong>情報資産の有効活用</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- スライド4: 効果的なプロンプトの5要素 -->
+        <div class="slide">
+            <h1>効果的なプロンプトの5要素</h1>
+            <pre><code>あなたは[役割・専門家]です。 ← <span class="highlight">要素1: 役割設定</span>
+私は[依頼者の立場や目的]です。 ← <span class="highlight">要素2: 文脈設定</span>
+以下の条件を守って出力してください。
+
+## 出力条件
+1. 目的： [最終的に達成したいことを明記] ← <span class="highlight">要素3: 目的</span>
+2. 形式： [箇条書き / 表形式 / 文章形式など] ← <span class="highlight">要素4: 形式</span>
+3. 文体： [簡潔でわかりやすい / 専門的で正確など] ← <span class="highlight">要素5: 文体</span>
+4. 制約： [字数制限 / 難しい用語には注釈を入れるなど]
+5. 出力の質： 
+   - 論理的で一貫性があること
+   - 冗長さを避け、要点を押さえること
+   - 必要なら例や比喩を入れてわかりやすくする</code></pre>
+        </div>
+
+        <!-- スライド5: フレームワークのメリット -->
+        <div class="slide">
+            <h1>このフレームワークのメリット</h1>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-sync-alt"></i></div>
+                    <h3>再現性が高い</h3>
+                    <p>誰でも同じ品質の出力を得られる</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-cog"></i></div>
+                    <h3>カスタマイズが容易</h3>
+                    <p>業務に応じて条件を調整可能</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-chart-bar"></i></div>
+                    <h3>品質管理が可能</h3>
+                    <p>出力条件で品質基準を明確化</p>
+                </div>
+            </div>
+            <div class="summary-box">
+                <h2><i class="fas fa-lightbulb"></i> 重要ポイント</h2>
+                <p>このフレームワークにより、AIを使った業務効率化を<br>
+                <strong>体系的・継続的・高品質</strong>に実現できます</p>
+            </div>
+        </div>
+
+        <!-- スライド7: 基本プロンプト -->
+        <div class="slide">
+            <h1>基本プロンプト</h1>
+            <pre><code>あなたは[役割・専門家]です。  
+私は[依頼者の立場や目的]です。  
+以下の条件を守って出力してください。
+
+## 出力条件
+1. 目的： [最終的に達成したいことを明記]  
+2. 形式： [例：箇条書き / 表形式 / 文章形式 / Markdown形式など]  
+3. 文体： [例：簡潔でわかりやすい / 専門的で正確 / 丁寧で親しみやすい]  
+4. 制約： [字数制限 / 難しい用語には注釈を入れる / 根拠を提示する など]  
+5. 出力の質： 
+   - 論理的で一貫性があること  
+   - 冗長さを避け、要点を押さえること  
+   - 必要なら例や比喩を入れてわかりやすくする  
+
+## 入力
+[ここに依頼内容やデータを記載]  
+
+## 出力
+[ここに「求める出力」を明示、例：レポートを作成してください]</code></pre>
+        </div>
+
+        <!-- スライド7.5: 基本プロンプト実践例 -->
+        <div class="slide">
+            <h1>基本プロンプト実践例 - ビジネスメール作成</h1>
+            <h2><i class="fas fa-envelope"></i> 実際の業務で使える具体例</h2>
+
+            <div class="prompt-example">
+                <h3><i class="fas fa-pen"></i> 実践プロンプト例</h3>
+                <pre><code>あなたは経験豊富なビジネスライターです。
+私は重要な会議の日程変更を関係者に連絡する必要がある社員です。
+以下の条件を守って出力してください。
+
+## 出力条件
+1. 目的：会議の日程変更を関係者に丁寧に連絡し、新日程への参加を促す
+2. 形式：ビジネスメール形式（件名、本文、署名を含む）
+3. 文体：丁寧でプロフェッショナル、かつ簡潔明瞭
+4. 制約：本文は200文字以内、変更理由と新日程を明確に記載
+5. 出力の質：
+   - 論理的で一貫性があること
+   - 冗長さを避け、要点を押さえること
+   - 必要なら例や比喩を入れてわかりやすくする
+
+## 入力
+月次売上会議を10月15日（火）14:00から10月17日（木）15:00に変更。
+理由：重要クライアントとの商談が急遽入ったため。
+場所は変わらず会議室A。資料は前日までに共有予定。
+
+## 出力
+関係者向けのメールを作成してください。</code></pre>
+            </div>
+
+            <div class="feature-grid" style="margin-top: 30px;">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-bullseye"></i></div>
+                    <h3>明確な役割設定</h3>
+                    <p>AIに専門家としての<br>役割を与える</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-list-check"></i></div>
+                    <h3>詳細な条件指定</h3>
+                    <p>5つの要素で<br>出力品質を制御</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-rocket"></i></div>
+                    <h3>即実践可能</h3>
+                    <p>このまま使える<br>テンプレート</p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h3><i class="fas fa-lightbulb"></i> このプロンプトの効果</h3>
+                <ul style="text-align: left; margin: 10px 20px;">
+                    <li>基本プロンプトの<strong>5要素すべて</strong>を具体的に指定</li>
+                    <li>誰でも同じ品質の<strong>ビジネス文書</strong>が作成可能</li>
+                    <li>業務シーンに応じて<strong>条件を調整</strong>するだけで応用可能</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- スライド8: Markdown形式とは？ -->
+        <div class="slide">
+            <h1>Markdown形式とは？</h1>
+            <h2><i class="fas fa-code"></i> AIが理解しやすい文書構造化フォーマット</h2>
+            
+            <div class="summary-box">
+                <p><strong>Markdown</strong>は、シンプルな記法で文書を構造化できる軽量マークアップ言語です。<br>
+                プレーンテキストで書きながら、見出し・リスト・表などの構造を表現できます。</p>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                    <h3>構造が明確</h3>
+                    <p>AIが文書の階層や要素を<br>正確に解析できる</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-eye"></i></div>
+                    <h3>読みやすい</h3>
+                    <p>人間にも機械にも<br>理解しやすい形式</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-magic"></i></div>
+                    <h3>整形が簡単</h3>
+                    <p>AIの出力を自動的に<br>見やすく整形</p>
+                </div>
+            </div>
+            
+            <div class="highlight-box">
+                <h3><i class="fas fa-star"></i> なぜAIと相性が良いのか？</h3>
+                <p>Markdownは<strong>構造と内容が分離</strong>されているため、AIが意図を正確に理解し、<br>
+                整理された形式で情報を出力できます。</p>
+            </div>
+        </div>
+
+        <!-- スライド9: Markdownの基本記法 -->
+        <div class="slide">
+            <h1>Markdownの基本記法</h1>
+            <h2><i class="fas fa-list-ul"></i> プロンプトでよく使う記法例</h2>
+            
+            <div class="comparison">
+                <div class="comparison-item before">
+                    <h3><i class="fas fa-edit"></i> Markdown記法</h3>
+                    <pre><code># 見出し1
+## 見出し2
+### 見出し3
+
+- 箇条書き項目1
+- 箇条書き項目2
+  - ネストも可能
+
+**強調（太字）**
+*イタリック*
+
+| 列1 | 列2 | 列3 |
+|-----|-----|-----|
+| データA | データB | データC |</code></pre>
+                </div>
+                <div class="comparison-item after">
+                    <h3><i class="fas fa-desktop"></i> 表示結果</h3>
+                    <div style="padding: 20px; background: white; border-radius: 8px;">
+                        <h1 style="font-size: 1.8em; margin: 10px 0;">見出し1</h1>
+                        <h2 style="font-size: 1.4em; margin: 10px 0;">見出し2</h2>
+                        <h3 style="font-size: 1.2em; margin: 10px 0;">見出し3</h3>
+                        <ul style="margin: 15px 0;">
+                            <li>箇条書き項目1</li>
+                            <li>箇条書き項目2
+                                <ul><li>ネストも可能</li></ul>
+                            </li>
+                        </ul>
+                        <p><strong>強調（太字）</strong><br>
+                        <em>イタリック</em></p>
+                        <table style="border-collapse: collapse; margin-top: 10px;">
+                            <tr style="background: #f0f0f0;">
+                                <th style="border: 1px solid #ddd; padding: 8px;">列1</th>
+                                <th style="border: 1px solid #ddd; padding: 8px;">列2</th>
+                                <th style="border: 1px solid #ddd; padding: 8px;">列3</th>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 8px;">データA</td>
+                                <td style="border: 1px solid #ddd; padding: 8px;">データB</td>
+                                <td style="border: 1px solid #ddd; padding: 8px;">データC</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="highlight-box">
+                <h3><i class="fas fa-lightbulb"></i> プロンプトでの活用方法</h3>
+                <p>「<strong>Markdown形式で出力してください</strong>」と指示するだけで、<br>
+                見出し・箇条書き・表などが整形された、読みやすい出力を得られます。</p>
+            </div>
+        </div>
+
+        <!-- スライド10: ChatGPTへのMarkdown指定プロンプト -->
+        <div class="slide">
+            <h1>ChatGPTへのMarkdown指定プロンプト</h1>
+            <h2><i class="fas fa-terminal"></i> 構造化された出力を得るための指示方法</h2>
+            
+            <div class="prompt-example">
+                <h3><i class="fas fa-pen"></i> プロンプト例</h3>
+                <pre><code>都留市の観光名所を3つ紹介してください。
+以下の形式でMarkdown形式で出力してください：
+
+## 名称
+**概要**: 50文字程度で説明
+### おすすめポイント
+- ポイント1
+- ポイント2
+- ポイント3</code></pre>
+            </div>
+            
+            <div class="highlight-box">
+                <h3><i class="fas fa-check-circle"></i> 効果的な指定のポイント</h3>
+                <ul style="text-align: left; margin: 10px 20px;">
+                    <li><strong>「Markdown形式で」</strong>と明示的に指定</li>
+                    <li>出力形式の<strong>具体例を提示</strong></li>
+                    <li>階層構造（##、###）を使って<strong>情報を整理</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- スライド11: ChatGPTのMarkdown出力例 -->
+        <div class="slide">
+            <h1>ChatGPTのMarkdown出力例</h1>
+            <h2><i class="fas fa-file-alt"></i> 実際のAI出力結果</h2>
+            
+            <div class="output-example">
+                <h3><i class="fas fa-code"></i> Markdown形式の出力</h3>
+                <pre style="font-size: 0.85em; max-height: 300px; overflow-y: auto;"><code># 都留市の観光名所
+
+## 1. リニア見学センター
+**概要**: リニアモーターカーの仕組みや開発の歴史を学べる体験型施設
+
+### おすすめポイント
+- 実物のリニア車両を間近で見学可能
+- 時速500kmの世界を体験できるシミュレーター
+- 子供から大人まで楽しめる体験型展示
+
+## 2. 勝山城跡
+**概要**: 戦国時代の山城跡で、富士山の絶景が楽しめるスポット
+
+### おすすめポイント
+- 富士山と都留市街を一望できる展望台
+- 春は桜、秋は紅葉の名所
+- ハイキングコースとしても人気
+
+## 3. 都留市商家資料館
+**概要**: 江戸時代の商家を復元した歴史資料館
+
+### おすすめポイント
+- 当時の生活用品や商売道具を展示
+- 定期的に伝統工芸のワークショップを開催
+- 都留の歴史と文化を学べる</code></pre>
+            </div>
+            
+            <div class="feature-grid" style="margin-top: 30px;">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-check"></i></div>
+                    <h3>階層構造が明確</h3>
+                    <p>見出しレベルで<br>情報を整理</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-copy"></i></div>
+                    <h3>再利用が簡単</h3>
+                    <p>そのまま文書に<br>コピー＆ペースト</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-exchange-alt"></i></div>
+                    <h3>他ツールへ転用</h3>
+                    <p>Word、Notion等へ<br>簡単に移行</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- スライド12: 音声デモ - インタビューワーAI体験 -->
+        <div class="slide">
+            <h1>音声デモ - インタビューワーAI体験</h1>
+            <h2><i class="fas fa-microphone"></i> 都留市の観光情報を元にした対話型デモンストレーション</h2>
+            
+            <div class="prompt-example" style="margin-top: 25px;">
+                <h3><i class="fas fa-script"></i> 使用するプロンプト</h3>
+                <pre style="font-size: 0.8em; max-height: 400px; overflow-y: auto;"><code>あなたは観光番組のインタビューワーです。
+以下の都留市の観光情報を元に、私（ゲスト）に対して
+自然な会話でインタビューしてください。
+
+【都留市の観光情報】
+## 1. リニア見学センター
+**概要**: リニアモーターカーの仕組みや開発の歴史を学べる体験型施設
+### おすすめポイント
+- 実物のリニア車両を間近で見学可能
+- 時速500kmの世界を体験できるシミュレーター
+- 子供から大人まで楽しめる体験型展示
+
+## 2. 勝山城跡
+**概要**: 戦国時代の山城跡で、富士山の絶景が楽しめるスポット
+### おすすめポイント
+- 富士山と都留市街を一望できる展望台
+- 春は桜、秋は紅葉の名所
+- ハイキングコースとしても人気
+
+## 3. 都留市商家資料館
+**概要**: 江戸時代の商家を復元した歴史資料館
+### おすすめポイント
+- 当時の生活用品や商売道具を展示
+- 定期的に伝統工芸のワークショップを開催
+- 都留の歴史と文化を学べる
+
+【インタビュー条件】
+- まず都留市の観光情報に関する概要を説明してからインタビューを開始してください。
+- 1つ目の質問から始めてください
+- 私の回答に応じて自然に会話を続けてください
+- 都留市の魅力を引き出すような質問をしてください
+- 親しみやすく、でも情報番組らしいトーンで
+- 私が「インタビューを開始してください」と言ったら、質問を始めてください
+
+では、インタビュー開始の合図を待ってください。</code></pre>
+            </div>
+            
+            <div class="feature-grid" style="margin-top: 25px;">
+                <div class="card success" style="padding: 15px;">
+                    <div class="feature-icon">🎬</div>
+                    <h4>リアルな対話体験</h4>
+                    <p style="font-size: 0.9em;">AIが自然な質問で会話をリード</p>
+                </div>
+                <div class="card primary" style="padding: 15px;">
+                    <div class="feature-icon">📊</div>
+                    <h4>データ活用の実例</h4>
+                    <p style="font-size: 0.9em;">スライド11の情報を元にした応用</p>
+                </div>
+                <div class="card warning" style="padding: 15px;">
+                    <div class="feature-icon">🎤</div>
+                    <h4>音声対話</h4>
+                    <p style="font-size: 0.9em;">実際の音声でのやり取りを体験</p>
+                </div>
+            </div>
+            
+            <div class="highlight-box" style="margin-top: 20px;">
+                <h3><i class="fas fa-lightbulb"></i> 期待される展開例</h3>
+                <ul style="text-align: left; margin: 10px 20px; font-size: 0.95em;">
+                    <li>「都留市に行かれたことはありますか？」</li>
+                    <li>「この中で一番興味があるのはどちらですか？」</li>
+                    <li>「リニアの時速500kmって実際どう思われます？」</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- スライド13: プロンプト自体をChatGPTに作成してもらう -->
+        <div class="slide">
+            <h1>プロンプト自体をChatGPTに作成してもらう</h1>
+            <h2><i class="fas fa-magic"></i> AIにプロンプトの改善を依頼する</h2>
+
+            <div class="prompt-example">
+                <h3><i class="fas fa-comment-dots"></i> シンプルな依頼例</h3>
+                <pre><code>顧客からのクレームメールに対して、営業担当として返信したいです。
+
+[顧客からのメール内容]
+先日購入した製品の不具合について、対応が遅く不満です。
+早急な解決を求めます。
+
+このプロンプトをもっとよくして。</code></pre>
+            </div>
+
+            <div class="highlight-box" style="margin-top: 20px;">
+                <h3><i class="fas fa-lightbulb"></i> この方法のメリット</h3>
+                <ul style="text-align: left; margin: 10px 20px;">
+                    <li>AIが<strong>業務に最適化されたプロンプト</strong>を自動生成</li>
+                    <li>プロンプトエンジニアリングの<strong>知識がなくても高品質</strong>な指示が作れる</li>
+                    <li>作成されたプロンプトは<strong>テンプレートとして保存・再利用</strong>可能</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- スライド24: 出力例 -->
+        <div class="slide">
+            <h1>出力例</h1>
+            <h2><i class="fas fa-check-circle"></i> ChatGPTが生成した改善版プロンプト</h2>
+            <pre><code>あなたは顧客満足度向上を重視する営業担当者です。
+顧客から届いたクレームメールに対して、以下の条件で返信文を作成してください。
+
+【条件】
+1. 冒頭で不快な思いをさせたことへの謝罪を述べる
+2. 顧客の不満点を具体的に認識していることを示す
+3. 問題解決のための具体的な対応策と時間軸を明示する
+4. 文体は誠実でプロフェッショナル、かつ共感的なトーンにする
+5. 専門用語は避け、わかりやすい言葉で説明する
+6. 最後に今後の改善への決意と直通連絡先を記載する
+
+【出力形式】
+- 件名（謝罪と対応を明確に示す）
+- 本文（段落構成で読みやすく）
+- 署名（担当者名と連絡先）
+
+【入力】
+[顧客からのメール内容をここに貼り付け]</code></pre>
+        </div>
+
+        <!-- スライド16: 商品紹介をプロンプトで作成 -->
+        <div class="slide">
+            <h1>商品紹介をプロンプトで作成</h1>
+            <h2><i class="fas fa-pen-fancy"></i> ライター視点での文章作成</h2>
+
+            <div class="prompt-example">
+                <h3><i class="fas fa-user-edit"></i> プロンプト例</h3>
+                <pre><code>あなたは優秀なコピーライターです。
+以下の条件で、新商品のワイヤレスイヤホンの紹介文を作成してください。
+
+## 商品情報
+- 商品名：SoundPro X1
+- 価格：15,000円
+- 特徴：ノイズキャンセリング機能、連続8時間再生、防水仕様
+
+## 出力条件
+1. 目的：商品の魅力を最大限に伝える
+2. 形式：キャッチコピーと説明文（200文字程度）
+3. 文体：プロフェッショナルで洗練された表現
+4. ターゲット：ビジネスパーソン
+
+## 出力
+商品紹介文を作成してください。</code></pre>
+            </div>
+
+            <div class="output-example" style="margin-top: 20px;">
+                <h3><i class="fas fa-file-alt"></i> 出力結果</h3>
+                <pre style="background: #f0f8ff;"><code>【究極の静寂、最高の音質】SoundPro X1
+
+騒がしいオフィスも、混雑した電車も、あなただけの音楽空間に。
+最先端ノイズキャンセリング技術が、周囲の雑音を完全にシャットアウト。
+8時間の連続再生で、朝の通勤から夜の帰宅まで充電不要。
+IPX5防水仕様により、突然の雨やジムでの使用も安心です。
+ビジネスシーンでもプライベートでも、あなたの日常を格上げする一品です。</code></pre>
+            </div>
+        </div>
+
+        <!-- スライド17: 顧客視点でレビュー -->
+        <div class="slide">
+            <h1>顧客視点でレビュー</h1>
+            <h2><i class="fas fa-user-check"></i> 役割を変えて文章を評価</h2>
+
+            <div class="prompt-example">
+                <h3><i class="fas fa-glasses"></i> 新しいプロンプト（役割変更）</h3>
+                <pre><code>あなたは慎重な購買判断をする消費者です。
+以下の商品紹介文を読んで、購入を検討する立場から
+改善点や不明確な点を指摘してください。
+
+【商品紹介文】
+『究極の静寂、最高の音質』SoundPro X1
+騒がしいオフィスも、混雑した電車も、あなただけの音楽空間に。
+最先端ノイズキャンセリング技術が、周囲の雑音を完全にシャットアウト。
+8時間の連続再生で、朝の通勤から夜の帰宅まで充電不要。
+IPX5防水仕様により、突然の雨やジムでの使用も安心です。
+
+【評価観点】
+- 具体性は十分か
+- 誇大表現はないか
+- 購入判断に必要な情報は揃っているか
+- 不明確な点はないか</code></pre>
+            </div>
+
+            <div class="card warning" style="margin-top: 20px;">
+                <h3><i class="fas fa-comments"></i> レビュー結果</h3>
+                <ul style="font-size: 0.95em;">
+                    <li>❌「完全にシャットアウト」は誇大表現では？</li>
+                    <li>❌ Bluetooth接続の安定性について記載なし</li>
+                    <li>❌ 充電時間の情報が不足</li>
+                    <li>❌ 保証期間やアフターサービスの説明なし</li>
+                    <li>✅ 防水性能の規格（IPX5）は明確で良い</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- スライド18: フィードバックを反映して改善 -->
+        <div class="slide">
+            <h1>フィードバックを反映して改善</h1>
+            <h2><i class="fas fa-sync-alt"></i> レビュー結果を元に文章をアップデート</h2>
+
+            <div class="comparison">
+                <div class="comparison-item before">
+                    <h3><i class="fas fa-times-circle"></i> 改善前</h3>
+                    <div style="font-size: 0.85em;">
+                        <p><strong>「完全に」</strong>シャットアウト<br>
+                        <span style="color: #ff5630;">→ 誇大表現</span></p>
+                        <p>8時間の連続再生<br>
+                        <span style="color: #ff5630;">→ 充電時間不明</span></p>
+                        <p>（記載なし）<br>
+                        <span style="color: #ff5630;">→ 接続性・保証の情報なし</span></p>
+                    </div>
+                </div>
+                <div class="comparison-item after">
+                    <h3><i class="fas fa-check-circle"></i> 改善後</h3>
+                    <div style="font-size: 0.85em;">
+                        <p>最大<strong>-35dB</strong>のノイズ低減<br>
+                        <span style="color: #36B37E;">→ 具体的な数値</span></p>
+                        <p>8時間再生（<strong>急速充電15分で2時間</strong>使用可）<br>
+                        <span style="color: #36B37E;">→ 充電情報追加</span></p>
+                        <p><strong>Bluetooth 5.3</strong>対応、<strong>1年保証</strong>付き<br>
+                        <span style="color: #36B37E;">→ 必要情報を補完</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-box" style="margin-top: 25px;">
+                <h3><i class="fas fa-star"></i> 役割設定の効果</h3>
+                <p><strong>同じAIでも役割を変えることで、異なる視点からの価値ある出力が得られます。</strong><br>
+                ライター → 顧客 → 改善という流れで、文章の質が段階的に向上しました。</p>
+            </div>
+        </div>
+
+        <!-- スライド22: レシート画像から、経費内訳作成 -->
+        <div class="slide">
+            <h1>レシート画像から、経費内訳作成</h1>
+            <div class="image-container">
+                <img src="/img/image-2.png" alt="レシート画像">
+            </div>
+        </div>
+
+        <!-- スライド23: プロンプト例（レシート） -->
+        <div class="slide">
+            <h1>プロンプト例</h1>
+            <pre><code>あなたは経理担当者です。  
+私は経費精算のためにレシートから内訳を作成する担当者です。
+以下のレシート画像を確認し、経費内訳を作成してください。
+
+## 出力条件
+1. 出力形式はMarkdown
+2. レシートに記載されている日付、店舗名、品目、金額を表形式で整理する
+3. 各項目は以下の列を含むこと
+   - 日付
+   - 店舗名
+   - 品目
+   - 金額
+4. 金額は全て数値として扱い、合計金額も算出する
+5. 不明な項目は「不明」と記載する
+6. 表の最後に「合計金額」を記載する
+
+## 入力
+レシート画像（アップロードされた画像ファイル）
+
+## 出力
+| 日付       | 店舗名     | 品目         | 金額   |
+|------------|------------|--------------|--------|
+| 2023/10/01 | スーパーA  | 食品         | 1200円 |
+| 2023/10/02 | コンビニB  | 飲料         | 300円   |
+| 2023/10/03 | レストランC | 食事         | 2500円 |
+| 合計金額   |            | |              | 4000円 |</code></pre>
+        </div>
+
+        <!-- スライド24: 出力例 -->
+        <div class="slide">
+            <h1>出力例</h1>
+            <div class="image-container">
+                <img src="/img/image-3.png" alt="レシート処理結果">
+            </div>
+        </div>
+
+        <!-- スライド25: 最新AIツール紹介 -->
+        <div class="slide">
+            <h1>最新AIツール紹介</h1>
+            <h2><i class="fas fa-rocket"></i> 2024-2025年注目の2つのGoogleAIツール</h2>
+
+            <div class="feature-grid">
+                <div class="card success">
+                    <div class="feature-icon"><i class="fas fa-file-alt"></i></div>
+                    <h3>NotebookLM</h3>
+                    <p>AI文書分析・ノート作成ツール<br>
+                    <strong>音声要約機能で話題沸騰</strong></p>
+                </div>
+                <div class="card primary">
+                    <div class="feature-icon"><i class="fas fa-image"></i></div>
+                    <h3>Nano Banana</h3>
+                    <p>超高速AI画像生成・編集ツール<br>
+                    <strong>1-2秒で画像生成・編集</strong></p>
+                </div>
+            </div>
+
+            <div class="summary-box" style="margin-top: 30px;">
+                <h3><i class="fas fa-info-circle"></i> なぜ今この2つなのか？</h3>
+                <p>どちらも<strong>2024-2025年にかけて大幅アップデート</strong>され、<br>
+                ビジネス現場での実用性が飛躍的に向上しました。</p>
+            </div>
+        </div>
+
+        <!-- スライド26: NotebookLM概要 -->
+        <div class="slide">
+            <h1>NotebookLM概要</h1>
+            <h2><i class="fas fa-brain"></i> AI文書分析で情報整理を革新</h2>
+
+            <div class="summary-box">
+                <p>GoogleのNotebookLMは、アップロードした文書やWebサイトを分析し、<br>
+                <strong>AIが理解しやすい形で整理・要約</strong>してくれるツールです。</p>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-microphone"></i></div>
+                    <h3>Audio Overview機能</h3>
+                    <p>文書をポッドキャスト風の<br>音声対話で要約</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-language"></i></div>
+                    <h3>日本語完全対応</h3>
+                    <p>2024年6月から<br>日本語での利用が可能</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <h3>モバイルアプリ</h3>
+                    <p>2025年5月リリース<br>いつでもどこでも利用</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- スライド27: NotebookLMの活用例 -->
+        <div class="slide">
+            <h1>NotebookLMの活用例</h1>
+            <h2><i class="fas fa-lightbulb"></i> 業務効率化の具体的な場面</h2>
+
+            <div class="comparison">
+                <div class="comparison-item before">
+                    <h3><i class="fas fa-clock"></i> 従来の作業</h3>
+                    <ul>
+                        <li>長い会議資料を手動で読み込み</li>
+                        <li>重要なポイントを手作業で抽出</li>
+                        <li>要約作成に数時間</li>
+                        <li>共有のための資料作成が別途必要</li>
+                    </ul>
+                </div>
+                <div class="comparison-item after">
+                    <h3><i class="fas fa-magic"></i> NotebookLM活用後</h3>
+                    <ul>
+                        <li>資料をアップロードするだけ</li>
+                        <li>AIが自動で重要ポイント抽出</li>
+                        <li>音声で聞きながら内容把握</li>
+                        <li>音声ファイルをそのまま共有可能</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h3><i class="fas fa-star"></i> 2025年最新機能</h3>
+                <p><strong>Audio Overview 2.0</strong>：50言語対応、インタラクティブ音声でリアルタイム質問が可能<br>
+                <strong>NotebookLM Plus</strong>：有料版で使用制限が大幅拡張（月額制）</p>
+            </div>
+        </div>
+
+        <!-- スライド28: Nano Banana概要 -->
+        <div class="slide">
+            <h1>Nano Banana概要</h1>
+            <h2><i class="fas fa-bolt"></i> 驚異的な速度の画像AI</h2>
+
+            <div class="summary-box">
+                <p>Nano Banana（Gemini 2.5 Flash Image）は、<strong>1-2秒で画像生成・編集</strong>を実現する<br>
+                Googleの革新的な画像AIです。公開1週間で2億枚の画像編集に使用されました。</p>
+            </div>
+
+            <div class="feature-grid">
+                <div class="card success">
+                    <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <h3>超高速処理</h3>
+                    <p>従来のAI画像ツールの<br><strong>5-10倍高速</strong></p>
+                </div>
+                <div class="card primary">
+                    <div class="feature-icon"><i class="fas fa-comments"></i></div>
+                    <h3>自然言語編集</h3>
+                    <p>「背景を雪山に」など<br>日常言葉で指示</p>
+                </div>
+                <div class="card warning">
+                    <div class="feature-icon"><i class="fas fa-user"></i></div>
+                    <h3>顔の一貫性</h3>
+                    <p>複数回の編集でも<br>人物の特徴を維持</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- スライド29: Nano Bananaの活用例 -->
+        <div class="slide">
+            <h1>Nano Bananaの活用例</h1>
+            <h2><i class="fas fa-palette"></i> 実際の変更例：服装変更</h2>
+
+            <div class="prompt-example" style="margin-bottom: 20px;">
+                <h3><i class="fas fa-comment-dots"></i> 使用したプロンプト</h3>
+                <pre><code>この男性にスーツを着せてください</code></pre>
+            </div>
+
+            <div class="comparison">
+                <div class="comparison-item before">
+                    <h3><i class="fas fa-arrow-right"></i> 変更前</h3>
+                    <div class="image-container" style="margin: 10px 0;">
+                        <img src="/img/yano_before.jpg" alt="変更前：カジュアル服装" style="max-height: 300px; border-radius: 10px;">
+                    </div>
+                    <p style="font-size: 0.9em; color: var(--text-secondary);">カジュアルな服装</p>
+                </div>
+                <div class="comparison-item after">
+                    <h3><i class="fas fa-check-circle"></i> 変更後</h3>
+                    <div class="image-container" style="margin: 10px 0;">
+                        <img src="/img/yano_after.png" alt="変更後：スーツ着用" style="max-height: 300px; border-radius: 10px;">
+                    </div>
+                    <p style="font-size: 0.9em; color: var(--text-secondary);">ビジネススーツに変更</p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h3><i class="fas fa-star"></i> 注目ポイント</h3>
+                <ul style="text-align: left; margin: 10px 20px;">
+                    <li>✅ <strong>顔の特徴が完全に保持</strong>されている</li>
+                    <li>✅ <strong>1-2秒</strong>で自然な服装変更が完了</li>
+                    <li>✅ シンプルな日本語指示で高品質な結果</li>
+                    <li>✅ ビジネス用途に即座に活用可能</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- スライド30: 新世代AIツールの活用戦略 -->
+        <div class="slide">
+            <h1>新世代AIツールの活用戦略</h1>
+            <h2><i class="fas fa-chess"></i> 業務効率化の次のステップ</h2>
+
+            <div class="comparison">
+                <div class="comparison-item before">
+                    <h3><i class="fas fa-file-text"></i> 文書・情報処理</h3>
+                    <p><strong>NotebookLM</strong>で革新</p>
+                    <ul style="font-size: 0.9em;">
+                        <li>音声での情報理解</li>
+                        <li>AI分析による洞察</li>
+                        <li>多言語対応</li>
+                        <li>リアルタイム質問</li>
+                    </ul>
+                </div>
+                <div class="comparison-item after">
+                    <h3><i class="fas fa-image"></i> 画像・ビジュアル制作</h3>
+                    <p><strong>Nano Banana</strong>で革新</p>
+                    <ul style="font-size: 0.9em;">
+                        <li>超高速画像生成・編集</li>
+                        <li>自然言葉での指示</li>
+                        <li>一貫性のある編集</li>
+                        <li>コスト効率の大幅向上</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="summary-box">
+                <h3><i class="fas fa-rocket"></i> 重要ポイント</h3>
+                <p>これらの最新AIツールは、<strong>従来の作業プロセスを根本から変革</strong>します。<br>
+                早期導入により、競合他社に対する大幅な効率化アドバンテージを獲得できます。</p>
+            </div>
+        </div>
+
+        <!-- スライド31: ChatGPT Thinking modeの活用 -->
+        <div class="slide">
+            <h1>ChatGPT Thinking modeの活用</h1>
+            <h2><i class="fas fa-brain"></i> より深い分析と精度の高い回答を得る方法</h2>
+            
+            <div class="summary-box">
+                <h3><i class="fas fa-info-circle"></i> Thinking modeとは</h3>
+                <p>複雑な問題を<strong>時間をかけて深く考える</strong>新機能。<br>
+                従来より詳細で正確な分析を提供します。<br>
+                <span style="color: var(--success); font-weight: bold;">無料版でも1日1回利用可能！</span></p>
+            </div>
+            
+            <div class="prompt-example">
+                <h3><i class="fas fa-terminal"></i> プロンプトでの指定方法</h3>
+                <pre><code>[質問や依頼内容をここに記載]
+
+しっかり考えて回答してください</code></pre>
+                <p style="margin-top: 15px;"><strong>その他の指定例：</strong></p>
+                <ul style="text-align: left; margin-left: 20px;">
+                    <li>「よく考えてから答えてください」</li>
+                    <li>「COTで考えてください」（Chain of Thought）</li>
+                    <li>「深く分析してから回答してください」</li>
+                </ul>
+            </div>
+            
+            <div class="feature-grid" style="margin-top: 30px;">
+                <div class="card primary" style="padding: 15px;">
+                    <div class="feature-icon">📄</div>
+                    <h4>高精度な提案書作成</h4>
+                    <p style="font-size: 0.9em;">複雑な要件を整理した提案書</p>
+                </div>
+                <div class="card success" style="padding: 15px;">
+                    <div class="feature-icon">📚</div>
+                    <h4>研修・教育資料の開発</h4>
+                    <p style="font-size: 0.9em;">体系的な学習コンテンツ</p>
+                </div>
+                <div class="card warning" style="padding: 15px;">
+                    <div class="feature-icon">💼</div>
+                    <h4>複雑な業務分析</h4>
+                    <p style="font-size: 0.9em;">多角的な視点での検討</p>
+                </div>
+                <div class="card error" style="padding: 15px;">
+                    <div class="feature-icon">🔍</div>
+                    <h4>重要な意思決定支援</h4>
+                    <p style="font-size: 0.9em;">リスクと機会の詳細分析</p>
+                </div>
+            </div>
+            
+            <div class="highlight-box" style="margin-top: 25px;">
+                <h3><i class="fas fa-check-circle"></i> ポイント</h3>
+                <ul style="text-align: left; margin: 10px 20px;">
+                    <li>✅ 無料版でも<strong>1日1回</strong>利用可能</li>
+                    <li>✅ 複雑な課題や重要な判断が必要な場面で活用</li>
+                    <li>✅ プロンプトの最後に<strong>「しっかり考えて」</strong>を追加するだけ</li>
+                    <li>⚠️ 通常より回答時間がかかるが、品質は大幅に向上</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ナビゲーションコントロール -->
+    <div class="nav-controls">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">
+            <i class="fas fa-chevron-left"></i>
+            前へ
+        </button>
+        <div class="slide-counter" id="slideCounter">1 / 34</div>
+        <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">
+            次へ
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            // 範囲チェック
+            if (n >= totalSlides) currentSlide = 0;
+            if (n < 0) currentSlide = totalSlides - 1;
+
+            // すべてのスライドを非表示
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            // 現在のスライドを表示
+            slides[currentSlide].classList.add('active');
+
+            // プログレスバー更新
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // スライド番号更新
+            document.getElementById('slideNumber').textContent = 
+                `${currentSlide + 1} / ${totalSlides}`;
+            
+            // ナビゲーションのスライドカウンター更新
+            const slideCounter = document.getElementById('slideCounter');
+            if (slideCounter) {
+                slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+            }
+
+            // ボタンの有効/無効切り替え
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            showSlide(currentSlide);
+        }
+
+        // キーボードナビゲーション
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                if (currentSlide < totalSlides - 1) changeSlide(1);
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (currentSlide > 0) changeSlide(-1);
+            } else if (e.key === 'Home') {
+                currentSlide = 0;
+                showSlide(currentSlide);
+            } else if (e.key === 'End') {
+                currentSlide = totalSlides - 1;
+                showSlide(currentSlide);
+            }
+        });
+
+        // タッチ/スワイプサポート
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            if (touchEndX < touchStartX - swipeThreshold) {
+                // 左スワイプ（次へ）
+                if (currentSlide < totalSlides - 1) changeSlide(1);
+            }
+            if (touchEndX > touchStartX + swipeThreshold) {
+                // 右スワイプ（前へ）
+                if (currentSlide > 0) changeSlide(-1);
+            }
+        }
+
+        // 初期化
+        showSlide(0);
+
+        // コードブロックにコピーボタンを追加
+        function addCopyButtons() {
+            const preElements = document.querySelectorAll('pre');
+            
+            preElements.forEach((pre, index) => {
+                // すでにコンテナで囲まれていない場合のみ処理
+                if (!pre.parentNode.classList.contains('code-container')) {
+                    // preをcode-containerで囲む
+                    const container = document.createElement('div');
+                    container.className = 'code-container';
+                    pre.parentNode.insertBefore(container, pre);
+                    container.appendChild(pre);
+                    
+                    // コピーボタンを作成
+                    const copyButton = document.createElement('button');
+                    copyButton.className = 'copy-button';
+                    copyButton.innerHTML = '<i class="fas fa-copy"></i> コピー';
+                    copyButton.setAttribute('data-code-index', index);
+                    
+                    // ボタンをコンテナに追加
+                    container.appendChild(copyButton);
+                }
+            });
+        }
+
+        // クリップボードにコピーする機能
+        async function copyToClipboard(text, button) {
+            try {
+                await navigator.clipboard.writeText(text);
+                
+                // ボタンの表示を一時的に変更
+                const originalHTML = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> コピー済み';
+                button.classList.add('copied');
+                
+                // 2秒後に元に戻す
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                    button.classList.remove('copied');
+                }, 2000);
+                
+            } catch (err) {
+                console.error('クリップボードへのコピーに失敗しました:', err);
+                
+                // フォールバック: 古いブラウザ用
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    button.innerHTML = '<i class="fas fa-check"></i> コピー済み';
+                    button.classList.add('copied');
+                    
+                    setTimeout(() => {
+                        button.innerHTML = '<i class="fas fa-copy"></i> コピー';
+                        button.classList.remove('copied');
+                    }, 2000);
+                } catch (err2) {
+                    console.error('フォールバックコピーも失敗しました:', err2);
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+
+        // コピーボタンのクリックイベント
+        function setupCopyButtons() {
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.copy-button')) {
+                    e.preventDefault();
+                    const button = e.target.closest('.copy-button');
+                    const container = button.parentNode;
+                    const pre = container.querySelector('pre');
+                    const codeText = pre.textContent || pre.innerText;
+                    
+                    copyToClipboard(codeText, button);
+                }
+            });
+        }
+
+        // コピーボタンの初期化
+        addCopyButtons();
+        setupCopyButtons();
+
+        // クリックでのページ送り機能を削除
+    </script>
+</body>
+</html>
